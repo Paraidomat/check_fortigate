@@ -1,10 +1,19 @@
 # check_fortigate
 
-`check_fortigate` is a check for Nagios or Icinga in order to check the health of your Fortigate firewall and to get performance data from it.
+`check_fortigate` is a check for Nagios or Icinga in order to check the health of your Fortigate firewall and to get performance data from it. It uses Python 3.
 
 # Setup
 
 Just download the `.py` file from this repository and save it to a folder where your monitoring system can access it.
+
+## Requirements
+
+The script uses the following Python 3 Modules:
+* `sys`
+* `getopt`
+* `ipaddress`
+* `re`
+* `pysnmp`
 
 # Usage
 
