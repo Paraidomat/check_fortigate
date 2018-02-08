@@ -20,7 +20,7 @@ The script uses the following Python 3 Modules:
 Simply call the Python-Skript:
 
 ```
-check_juniper_srx -i <ipv4Address> -c <communityString> -m <mode> [-n <interface-name>]
+check_fortigate -i <ipv4Address> -c <communityString> -m <mode> [-n <interface-name>]
 ```
 
 ## Available Modes:
