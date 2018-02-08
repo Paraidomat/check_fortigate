@@ -1,4 +1,3 @@
-#!/usr/local/bin/python3
 #check_juniper_srx
 
 import sys, getopt, ipaddress, re
@@ -10,7 +9,9 @@ exitmessage_d = { 0: "OK", 1: "WARNING", 2: "CRITICAL" }
 
 def cpu_load(ipAddress_s=None, communityString_s=None, oidCurrent_d=None):
     percentage = -1
-    cpuLoad_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["oid"])
+    cpuLoad_varBindTable = snmp_get(ipAddress_s,
+                                    communityString_s,
+                                    oidCurrent_d["oid"])
     if cpuLoad_varBindTable == -1:
         return unkown("snmp_get cpuLoad_varBindTable failed!")
 
@@ -18,24 +19,31 @@ def cpu_load(ipAddress_s=None, communityString_s=None, oidCurrent_d=None):
         for name, val in varBindTableRow:
             percentage = int(val)
 
-    perfdata_s = "cpu_load=%d;%d;%d;;100" % (percentage, oidCurrent_d["warning"], oidCurrent_d["critical"])
+    perfdata_s = "cpu_load=%d;%d;%d;;100" % (percentage,
+                                             oidCurrent_d["warning"],
+                                             oidCurrent_d["critical"])
 
     if percentage != -1:
         if percentage < oidCurrent_d["warning"]:
-            print ("%s - Everything is fine. | %s" % (exitmessage_d[0], perfdata_s))
+            print ("%s - Everything is fine. | %s" % (exitmessage_d[0],
+                                                      perfdata_s))
             return 0
         elif percentage < oidCurrent_d["critical"]:
-            print ("%s - CPU load is high! Verify: %s | %s" % (exitmessage_d[1], oidCurrent_d["cli"], perfdata_s))
+            print ("{} - CPU load is high! Verify: {} | {}".format(
+                exitmessage_d[1], oidCurrent_d["cli"], perfdata_s))
             return 1
         elif percentage >= oidCurrent_d["critical"]:
-            print ("%s - CPU load is too high! Verify: %s | %s" % (exitmessage_d[2], oidCurrent_d["cli"], perfdata_s))
+            print ("{} - CPU load is too high! Verify: {} | {}".format(
+                exitmessage_d[2], oidCurrent_d["cli"], perfdata_s))
             return 2
     else:
         return unkown("Something went wrong!")
 
-def memory(ipAddress_s=None, communityString_s=None, oidCurrent_d=None, oidMax_d=None):
+def memory(ipAddress_s=None, communityString_s=None,
+           oidCurrent_d=None, oidMax_d=None):
     memoryCurrent = -1
-    memoryCurrent_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["oid"])
+    memoryCurrent_varBindTable = snmp_get(ipAddress_s, communityString_s,
+                                          oidCurrent_d["oid"])
     if memoryCurrent_varBindTable == -1:
         return unkown("snmp_get memoryCapacity_varBindTable failed!")
 
@@ -47,25 +55,32 @@ def memory(ipAddress_s=None, communityString_s=None, oidCurrent_d=None, oidMax_d
         return unkown ("memoryCapacity or memoryCurrent not set!")
     percentage = memoryCurrent
 
-    perfdata_s = "memory=%s;%s;%s;;100" % (percentage, oidCurrent_d["warning"], oidCurrent_d["critical"])
+    perfdata_s = "memory=%s;%s;%s;;100" % (percentage, oidCurrent_d["warning"],
+                                           oidCurrent_d["critical"])
 
     if percentage != -1:
         if percentage < oidCurrent_d["warning"]:
-            print ("%s - Everything is fine. | %s" % (exitmessage_d[0],  perfdata_s))
+            print ("%s - Everything is fine. | %s" % (exitmessage_d[0],
+                                                      perfdata_s))
             return 0
         elif percentage < oidCurrent_d["critical"]:
-            print ("%s - Memory usage is high! Verify: %s | %s" % (exitmessage_d[1], oidCurrent_d["cli"], perfdata_s))
+            print ("{} - Memory usage is high! Verify: {} | {}"format(
+                exitmessage_d[1], oidCurrent_d["cli"], perfdata_s))
             return 1
         elif percentage >= oidCurrent_d["critical"]:
-            print ("%s - Memory usage is too high! Verify: %s | %s" % (exitmessage_d[2], oidCurrent_d["cli"], perfdata_s))
+            print ("{} - Memory usage is too high! Verify: {} | {}".format(
+                exitmessage_d[2], oidCurrent_d["cli"], perfdata_s))
             return 2
     else:
         return unkown("Something went wrong!")
 
-def memory_low(ipAddress_s=None, communityString_s=None, oidCurrent_d=None, oidMax_d=None):
+def memory_low(ipAddress_s=None, communityString_s=None,
+               oidCurrent_d=None, oidMax_d=None):
     memoryLowCurrent = -1
     percentage = -1
-    memoryLowCurrent_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["oid"])
+    memoryLowCurrent_varBindTable = snmp_get(ipAddress_s,
+                                             communityString_s,
+                                             oidCurrent_d["oid"])
     if memoryLowCurrent_varBindTable == -1:
         return unkown("snmp_get memoryLowCurrent_varBindTable failed!")
 
@@ -77,27 +92,35 @@ def memory_low(ipAddress_s=None, communityString_s=None, oidCurrent_d=None, oidM
         return unkown ("memoryLowCapacity == -1 or memoryLowCurrent == -1")
     percentage = memoryLowCurrent
 
-    perfdata_s = "memory_low=%s;%s;%s;;100" % (percentage, oidCurrent_d["warning"], oidCurrent_d["critical"])
+    perfdata_s = "memory_low=%s;%s;%s;;100" % (percentage,
+                                               oidCurrent_d["warning"],
+                                               oidCurrent_d["critical"])
 
     if percentage != -1:
         if percentage < oidCurrent_d["warning"]:
-            print ("%s - Everything is fine. | %s" % (exitmessage_d[0], perfdata_s))
+            print ("%s - Everything is fine. | %s" % (exitmessage_d[0],
+                                                      perfdata_s))
             return 0
         elif percentage < oidCurrent_d["critical"]:
-            print ("%s - Low-Memory usage is high! | %s" % (exitmessage_d[1], perfdata_s))
+            print ("%s - Low-Memory usage is high! | %s" % (exitmessage_d[1],
+                                                            perfdata_s))
             return 1
         elif percentage >= oidCurrent_d["critical"]:
-            print ("%s - Low-Memory usage is too high! | %s" % (exitmessage_d[2], perfdata_s))
+            print ("{} - Low-Memory usage is too high! | {}"format(
+                exitmessage_d[2], perfdata_s))
             return 2
     else:
         return unkown("Something went wrong!")
 
 
-def disk(ipAddress_s=None, communityString_s=None, oidCurrent_d=None, oidMax_d=None):
+def disk(ipAddress_s=None, communityString_s=None,
+         oidCurrent_d=None, oidMax_d=None):
     diskCurrent = -1
     diskCapacity = -1
     percentage = -1
-    diskCurrent_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["oid"])
+    diskCurrent_varBindTable = snmp_get(ipAddress_s,
+                                        communityString_s,
+                                        oidCurrent_d["oid"])
     if diskCurrent_varBindTable == -1:
         return unkown("snmp_get diskCurrent_varBindTable failed!")
 
@@ -105,7 +128,8 @@ def disk(ipAddress_s=None, communityString_s=None, oidCurrent_d=None, oidMax_d=N
         for name, val in varBindTableRow:
             diskCurrent = val
 
-    diskCapacity_varBindTable = snmp_get(ipAddress_s, communityString_s, oidMax_d["oid"])
+    diskCapacity_varBindTable = snmp_get(ipAddress_s, communityString_s,
+                                         oidMax_d["oid"])
     if diskCapacity_varBindTable == -1:
         return unkown("snmp_get diskCapacity_varBindTable failed!")
 
@@ -117,46 +141,60 @@ def disk(ipAddress_s=None, communityString_s=None, oidCurrent_d=None, oidMax_d=N
         return unkown ("diskCurrent == -1 or diskCapacity == -1")
     percentage = int((diskCurrent / diskCapacity) * 100)
 
-    perfdata_s = "disk=%s;%s;%s;;100" % (percentage, oidCurrent_d["warning"], oidCurrent_d["critical"])
+    perfdata_s = "disk=%s;%s;%s;;100" % (percentage,
+                                         oidCurrent_d["warning"],
+                                         oidCurrent_d["critical"])
 
     if percentage != -1:
         if percentage < oidCurrent_d["warning"]:
-            print ("%s - Everything is fine. | %s" % (exitmessage_d[0], perfdata_s))
+            print ("%s - Everything is fine. | %s" % (exitmessage_d[0],
+                                                      perfdata_s))
             return 0
         elif percentage < oidCurrent_d["critical"]:
-            print ("%s - Disk usage is high! | %s" % (exitmessage_d[1], perfdata_s))
+            print ("%s - Disk usage is high! | %s" % (exitmessage_d[1],
+                                                      perfdata_s))
             return 1
         elif percentage >= oidCurrent_d["critical"]:
-            print ("%s - Disk usage is too high! | %s" % (exitmessage_d[2], perfdata_s))
+            print ("%s - Disk usage is too high! | %s" % (exitmessage_d[2],
+                                                          perfdata_s))
             return 2
     else:
         return unkown("Something went wrong!")
 
 
 def session_four(ipAddress_s=None, communityString_s=None, oidCurrent_d=None):
-    sessionFour_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["oid"])
+    sessionFour_varBindTable = snmp_get(ipAddress_s,
+                                        communityString_s,
+                                        oidCurrent_d["oid"])
     if sessionFour_varBindTable == -1:
         return unkown("snmp_get failed!")
 
     for varBindTableRow in sessionFour_varBindTable:
         for name, val in varBindTableRow:
             perfdata_s = "sessioncount_four=%s;;;;" % str(val)
-            print ("OK - IPv4 session count is %s | %s" % (str(val), perfdata_s))
+            print ("OK - IPv4 session count is {} | {}".format(str(val),
+                                                               perfdata_s))
             return 0
 
 def session_six(ipAddress_s=None, communityString_s=None, oidCurrent_d=None):
-    sessionSix_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["oid"])
+    sessionSix_varBindTable = snmp_get(ipAddress_s,
+                                       communityString_s,
+                                       oidCurrent_d["oid"])
     if sessionSix_varBindTable == -1:
         return unkown("snmp_get sessionSix_varBindTable failed!")
 
     for varBindTableRow in sessionSix_varBindTable:
         for name, val in varBindTableRow:
             perfdata_s = "sessioncount_six=%s;;;;" % str(val)
-            print ("OK - IPv6 session count is %s | %s" % (str(val), perfdata_s))
+            print ("OK - IPv6 session count is {} | {}"format(str(val),
+                                                              perfdata_s))
             return 0
 
-def software_version(ipAddress_s=None, communityString_s=None, oidCurrent_d=None):
-    version_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["oid"])
+def software_version(ipAddress_s=None, communityString_s=None,
+                     oidCurrent_d=None):
+    version_varBindTable = snmp_get(ipAddress_s,
+                                    communityString_s,
+                                    oidCurrent_d["oid"])
     if version_varBindTable == -1:
         return unkown("snmp_get failed!")
 
@@ -165,19 +203,26 @@ def software_version(ipAddress_s=None, communityString_s=None, oidCurrent_d=None
             print ("OK - Version is %s" % (str(val)))
             return 0
 
-def interface_list(ipAddress_s=None, communityString_s=None, oidCurrent_d=None):
-    interfaces_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["oid"])
+def interface_list(ipAddress_s=None, communityString_s=None,
+                   oidCurrent_d=None):
+    interfaces_varBindTable = snmp_get(ipAddress_s,
+                                       communityString_s,
+                                       oidCurrent_d["oid"])
     if interfaces_varBindTable == -1:
         return unkown("snmp_get failed!")
 
     for varBindTableRow in interfaces_varBindTable:
         for name, val in varBindTableRow:
-            print ("Interface-ID: %s Interface-Name: %s" % (str(name).split('.')[10], val))
+            print ("Interface-ID: {} Interface-Name: {}".format(
+                str(name).split('.')[10], val))
 
     return 0
 
-def interface_status(ipAddress_s=None, communityString_s=None, oidCurrent_d=None, interfaceName_s=None):
-    interfaces_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["ifDescr"]["oid"])
+def interface_status(ipAddress_s=None, communityString_s=None,
+                     oidCurrent_d=None, interfaceName_s=None):
+    interfaces_varBindTable = snmp_get(ipAddress_s,
+                                       communityString_s,
+                                       oidCurrent_d["ifDescr"]["oid"])
     interfaceId_s = "-1"
     exitstatus_l = [0]
     critinfo_s = ""
@@ -192,43 +237,56 @@ def interface_status(ipAddress_s=None, communityString_s=None, oidCurrent_d=None
     if interfaceId_s != "-1":
         ifAdminStatus = 0
         ifOperStatus = 0
-        ifAdminStatus_table = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["ifAdminStatus"]["oid"])
+        ifAdminStatus_table = snmp_get(ipAddress_s,
+                                       communityString_s,
+                                       oidCurrent_d["ifAdminStatus"]["oid"])
         for varBindTableRow in ifAdminStatus_table:
             for name, val in varBindTableRow:
-                if str(name) == "%s.%s" % (oidCurrent_d["ifAdminStatus"]["oid"], interfaceId_s):
+                if str(name) == "{}.{}".format(
+                    oidCurrent_d["ifAdminStatus"]["oid"], interfaceId_s):
                     if int(val) == 2:
                         exitstatus_l.append(2)
+                        # TODO: Make this line shorter!
                         critinfo_s = "%s Interface %s is administratively down!" % (critinfo_s, interfaceName_s)
                         ifAdminStatus = int(val)
 
-        ifOperStatus_table = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["ifOperStatus"]["oid"])
+        ifOperStatus_table = snmp_get(ipAddress_s, communityString_s,
+                                      oidCurrent_d["ifOperStatus"]["oid"])
         for varBindTableRow in ifOperStatus_table:
             for name, val in varBindTableRow:
-                if str(name) == "%s.%s" % (oidCurrent_d["ifOperStatus"]["oid"], interfaceId_s):
+                if str(name) == "%s.%s" % (oidCurrent_d["ifOperStatus"]["oid"],
+                                           interfaceId_s):
                     if int(val) == 2:
                         exitstatus_l.append(2)
-                        critinfo_s = "%s Interface %s is down!" % (critinfo_s, interfaceName_s)
+                        critinfo_s = "{} Interface {} is down!".format(
+                            critinfo_s, interfaceName_s)
                     elif int(val) == 7:
                         exitstatus_l.append(2)
-                        critinfo_s = "%s Interface %s is lowerLayerDown!" % (critinfo_s, interfaceName_s)
+                        critinfo_s = "{} Interface {} is lowerLayerDown!".format(
+                            critinfo_s, interfaceName_s)
                     elif int(val) == 1:
                         exitstatus_l.append(0)
                         ifOperStatus = 0
                     else:
                         exitstatus_l.append(3)
-                        critinfo_s = "%s Interface %s status is unkown!" % (critinfo_s, interfaceName_s)
+                        critinfo_s = "{} Interface {} status is unkown!".format(
+                            critinfo_s, interfaceName_s)
 
         # Return-Data
         if max(exitstatus_l) == 0:
             print ("%s - Everything is fine | ifAdminStatus=%s;1;2;;2 ifOperStatus=%s;1;2;;2" %
-                   (exitmessage_d[max(exitstatus_l)], ifAdminStatus, ifOperStatus))
+                   (exitmessage_d[max(exitstatus_l)], ifAdminStatus,
+                    ifOperStatus))
         else:
             print ("%s %s | ifAdminStatus=%s;1;2;;2 ifOperStatus=%s;1;2;;2" %
-                   (exitmessage_d[max(exitstatus_l)], critinfo_s, ifAdminStatus, ifOperStatus))
+                   (exitmessage_d[max(exitstatus_l)], critinfo_s,
+                    ifAdminStatus, ifOperStatus))
         return max(exitstatus_l)
 
-def interface_status_detail(ipAddress_s=None, communityString_s=None, oidCurrent_d=None, interfaceName_s=None):
-    interfaces_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["ifDescr"]["oid"])
+def interface_status_detail(ipAddress_s=None, communityString_s=None,
+                            oidCurrent_d=None, interfaceName_s=None):
+    interfaces_varBindTable = snmp_get(ipAddress_s, communityString_s,
+                                       oidCurrent_d["ifDescr"]["oid"])
     interfaceId_s = "-1"
     exitstatus_l = [0]
     critinfo_s = ""
@@ -244,26 +302,33 @@ def interface_status_detail(ipAddress_s=None, communityString_s=None, oidCurrent
                 interfaceId_s = str(name).split('.')[10]
 
     if interfaceId_s != "-1":
-        ifAdminStatus_table = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["ifAdminStatus"]["oid"])
+        ifAdminStatus_table = snmp_get(ipAddress_s, communityString_s,
+                                       oidCurrent_d["ifAdminStatus"]["oid"])
         for varBindTableRow in ifAdminStatus_table:
             for name, val in varBindTableRow:
-                if str(name) == "%s.%s" % (oidCurrent_d["ifAdminStatus"]["oid"], interfaceId_s):
+                if str(name) == "{}.{}".format(
+                        oidCurrent_d["ifAdminStatus"]["oid"], interfaceId_s):
                     if int(val) == 2:
                         exitstatus_l.append(2)
-                        critinfo_s = "%s Interface %s is administratively down!" % (critinfo_s, interfaceName_s)
+                        critinfo_s = "%s Interface %s is administratively down!" % (
+                            critinfo_s, interfaceName_s)
                         ifAdminStatus = int(val)
 
-        ifOperStatus_table = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["ifOperStatus"]["oid"])
+        ifOperStatus_table = snmp_get(ipAddress_s, communityString_s,
+                                      oidCurrent_d["ifOperStatus"]["oid"])
         for varBindTableRow in ifOperStatus_table:
             for name, val in varBindTableRow:
-                if str(name) == "%s.%s" % (oidCurrent_d["ifOperStatus"]["oid"], interfaceId_s):
+                if str(name) == "%s.%s" % (oidCurrent_d["ifOperStatus"]["oid"],
+                                           interfaceId_s):
                     ifOperStatus = int(val)
                     if int(val) == 2:
                         exitstatus_l.append(2)
-                        critinfo_s = "%s Interface %s is down!" % (critinfo_s, interfaceName_s)
+                        critinfo_s = "{} Interface {} is down!".format(
+                            critinfo_s, interfaceName_s)
                     elif int(val) == 7:
                         exitstatus_l.append(2)
-                        critinfo_s = "%s Interface %s is lowerLayerDown!" % (critinfo_s, interfaceName_s)
+                        critinfo_s = "{} Interface {} is lowerLayerDown!".format(
+                            critinfo_s, interfaceName_s)
 
         try:
             oidCurrent_d.pop("ifDescr", None)
@@ -274,11 +339,14 @@ def interface_status_detail(ipAddress_s=None, communityString_s=None, oidCurrent
             return unkown("something went wrong!")
 
         for query in oidCurrent_d:
-            query_table = snmp_get(ipAddress_s, communityString_s, oidCurrent_d[query]["oid"])
+            query_table = snmp_get(ipAddress_s, communityString_s,
+                                   oidCurrent_d[query]["oid"])
             for varBindTableRow in query_table:
                 for name, val in varBindTableRow:
-                    if str(name) == "%s.%s" % (oidCurrent_d[query]["oid"], interfaceId_s):
-                        perfdata_s = "%s %s=%s;;;;" % (perfdata_s, query, str(val))
+                    if str(name) == "%s.%s" % (oidCurrent_d[query]["oid"],
+                                               interfaceId_s):
+                        perfdata_s = "%s %s=%s;;;;" % (perfdata_s, query,
+                                                       str(val))
 
         # Return-Data
         if max(exitstatus_l) == 0:
@@ -295,7 +363,9 @@ def hardware_health(ipAddress_s=None, communityString_s=None, oidCurrent_d=None)
     alarmStatusIndexes_l = []
     criticalThings_l = []
     exitstring = ""
-    fgHwSensorEntAlarmStatus_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["fgHwSensorEntAlarmStatus"]["oid"])
+    fgHwSensorEntAlarmStatus_varBindTable = snmp_get(
+        ipAddress_s, communityString_s,
+        oidCurrent_d["fgHwSensorEntAlarmStatus"]["oid"])
     if fgHwSensorEntAlarmStatus_varBindTable == -1:
         return unkown("snmp_get fgGwSensorEntAlarmStatus failed!")
 
@@ -308,16 +378,22 @@ def hardware_health(ipAddress_s=None, communityString_s=None, oidCurrent_d=None)
         print ("%s - Everything is fine." % exitmessage_d[0])
         return 0
     else:
-        fgHwSensorEntName_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["fgHwSensorEntName"]["oid"])
-        fgHwSensorEntValue_varBindTable = snmp_get(ipAddress_s, communityString_s, oidCurrent_d["fgHwSensorEntValue"]["oid"])
-        if fgHwSensorEntName_varBindTable == -1 or fgHwSensorEntValue_varBindTable == -1:
+        fgHwSensorEntName_varBindTable = snmp_get(
+            ipAddress_s, communityString_s,
+            oidCurrent_d["fgHwSensorEntName"]["oid"])
+        fgHwSensorEntValue_varBindTable = snmp_get(
+            ipAddress_s, communityString_s,
+            oidCurrent_d["fgHwSensorEntValue"]["oid"])
+        if fgHwSensorEntName_varBindTable == -1 \
+                or fgHwSensorEntValue_varBindTable == -1:
             return unkown ("snmp_get fgHwSensorEntName_varBindTable / fgHwSensorEntValue_varBindTable failed")
 
         exitstring = "%s -" % exitmessage_d[2]
         for index in alarmStatusIndexes_l:
             name = fgHwSensorEntName_varBindTable[int(index)-1][0][1]
             value = fgHwSensorEntValue_varBindTable[int(index)-1][0][1]
-            exitstring = "%s %s is faulty (Value = %s), " % (exitstring, name, value)
+            exitstring = "%s %s is faulty (Value = %s), ".format(
+                exitstring, name, value)
 
         print (exitstring)
         return 2
@@ -466,15 +542,15 @@ def main (argv):
     }
 
     if len(sys.argv) < 7:
-        optError (err="Wrong parameter count: " + str(len(sys.argv)) + "Parameters: "+ str(sys.argv), mode_l=mode_l )
+        optError(err="Wrong parameter count: " + str(len(sys.argv)) + "Parameters: "+ str(sys.argv), mode_l=mode_l )
         sys.exit(3)
 
 
     try:
-        opts, args = getopt.getopt(argv,
-                                   "hi:c:m:n::",
-                                   ["ipAddress_s=", "communityString_s=", "mode_s=", "interfaceName_s="]
-                                   )
+        opts, args = getopt.getopt(argv, "hi:c:m:n::", [ "ipAddress_s=",
+                                                         "communityString_s=",
+                                                         "mode_s=",
+                                                         "interfaceName_s="])
     except getopt.GetoptError as err:
         optError(err, mode_l) # call Error-Print-Function
         exitstatus_l.append(3)
@@ -501,37 +577,50 @@ def main (argv):
 
     # Method dispatching + save exit status
     if mode_s == "interface_status":
-        exitstatus_l.append(interface_status(ipAddress_s, communityString_s,
-                                             oidCurrent_d=IfMib_d, interfaceName_s=interfaceName_s))
+        exitstatus_l.append(interface_status(
+            ipAddress_s, communityString_s, oidCurrent_d=IfMib_d,
+            interfaceName_s=interfaceName_s))
     elif mode_s == "interface_status_detail":
-        exitstatus_l.append(interface_status_detail(ipAddress_s, communityString_s,
-                                                    oidCurrent_d=IfMib_d, interfaceName_s=interfaceName_s))
+        exitstatus_l.append(interface_status_detail(
+            ipAddress_s, communityString_s,
+            oidCurrent_d=IfMib_d, interfaceName_s=interfaceName_s))
     elif mode_s == "interface_list":
         exitstatus_l.append(interface_list(ipAddress_s, communityString_s,
                                            oidCurrent_d=IfMib_d["ifDescr"]))
     elif mode_s == "software_version":
-        exitstatus_l.append(software_version(ipAddress_s, communityString_s,
-                                             oidCurrent_d=FortiOSMib_d["fgSysVersion"]))
+        exitstatus_l.append(software_version(
+            ipAddress_s, communityString_s,
+            oidCurrent_d=FortiOSMib_d["fgSysVersion"]))
     elif mode_s == "cpu_load":
-        exitstatus_l.append(cpu_load(ipAddress_s, communityString_s,
-                                     oidCurrent_d=FortiOSMib_d["fgSysCpuUsage"]))
+        exitstatus_l.append(cpu_load(
+            ipAddress_s, communityString_s,
+            oidCurrent_d=FortiOSMib_d["fgSysCpuUsage"]))
     elif mode_s == "memory":
-        exitstatus_l.append(memory(ipAddress_s, communityString_s,
-                                   oidCurrent_d=FortiOSMib_d["fgSysMemUsage"], oidMax_d=FortiOSMib_d["fgSysMemCapacity"]))
+        exitstatus_l.append(memory(
+            ipAddress_s, communityString_s,
+            oidCurrent_d=FortiOSMib_d["fgSysMemUsage"],
+            oidMax_d=FortiOSMib_d["fgSysMemCapacity"]))
     elif mode_s == "memory_low":
-        exitstatus_l.append(memory_low(ipAddress_s, communityString_s,
-                                       oidCurrent_d=FortiOSMib_d["fgSysMemUsage"], oidMax_d=FortiOSMib_d["fgSysMemCapacity"]))
+        exitstatus_l.append(memory_low(
+            ipAddress_s, communityString_s,
+            oidCurrent_d=FortiOSMib_d["fgSysMemUsage"],
+            oidMax_d=FortiOSMib_d["fgSysMemCapacity"]))
     elif mode_s == "disk":
-        exitstatus_l.append(disk(ipAddress_s, communityString_s,
-                                 oidCurrent_d=FortiOSMib_d["fgSysDiskUsage"], oidMax_d=FortiOSMib_d["fgSysDiskCapacity"]))
+        exitstatus_l.append(disk(
+            ipAddress_s, communityString_s,
+            oidCurrent_d=FortiOSMib_d["fgSysDiskUsage"],
+            oidMax_d=FortiOSMib_d["fgSysDiskCapacity"]))
     elif mode_s == "session_four":
-        exitstatus_l.append(session_four(ipAddress_s, communityString_s,
-                                     oidCurrent_d=FortiOSMib_d["fgSysSesCount"]))
+        exitstatus_l.append(session_four(
+            ipAddress_s, communityString_s,
+            oidCurrent_d=FortiOSMib_d["fgSysSesCount"]))
     elif mode_s == "session_six":
-        exitstatus_l.append(session_six(ipAddress_s, communityString_s,
-                                     oidCurrent_d=FortiOSMib_d["fgSysSes6Count"]))
+        exitstatus_l.append(session_six(
+            ipAddress_s, communityString_s,
+            oidCurrent_d=FortiOSMib_d["fgSysSes6Count"]))
     elif mode_s == "hardware_health":
-        exitstatus_l.append(hardware_health(ipAddress_s, communityString_s, oidCurrent_d=ForiOSHardwareMib_d))
+        exitstatus_l.append(hardware_health(
+            ipAddress_s, communityString_s, oidCurrent_d=ForiOSHardwareMib_d))
     else:
         optError (err="Wrong Mode! - Mode given was: " + mode_s, mode_l=mode_l)
         sys.exit(3)
