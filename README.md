@@ -17,7 +17,7 @@ The script uses the following Python 3 Modules:
 
 # Usage
 
-Simply call the Python-Skript:
+Simply call the Python-Script:
 
 ```
 check_fortigate -i <ipv4Address> -c <communityString> -m <mode> [-n <interface-name>]
